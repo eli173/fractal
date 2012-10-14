@@ -1,0 +1,42 @@
+// Sets up window...
+#include <stdio.h>
+#include <stdlib.h>
+#include <SDL/SDL.h>
+
+#ifdef LINUX
+#include <GL/gl.h>
+#endif
+#ifdef MAC
+#include <OpenGL/gl.h>
+#endif
+
+//#include "setplatforms.h" ??
+
+void sdl_setup() {
+  if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+    printf("Error:%s\n", SDL_GetError());
+    return;
+  }
+  atexit(SDL_Quit);
+  //atexit(freeall); hell is this?
+  SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+  SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5);
+  SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 6);
+  SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 5);
+  if (SDL_SetVideoMode(640, 480, 16, SDL_OPENGL) == NULL) {
+    printf("Error:%s\n", SDL_GetError());
+    return;
+  }
+}
+
+void gl_setup() {
+  //I don't know what any of this really does...
+  glViewport(0,0,640,480);
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  glFrustum(-4.0, 4.0, -3.0, 3.0, 1.0, 10.0);//???
+  glClearColor(0,0,0,0);
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  SDL_Delay(10);
+}

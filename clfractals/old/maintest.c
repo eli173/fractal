@@ -1,0 +1,88 @@
+//mandelbrot/fractal generator
+//will initially just be mandelbrot set, but will be designed so any polynomial can easily be implemented as a seed
+
+//#include "windowset.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <SDL/SDL.h>
+
+//I'll just implement opencl version later...
+#include "complex.h"
+//actually maybe this works...
+
+double set_point(int pixel, int size, float min, float max) {//sets the point on-screen to a point on the plane. Only on one axis though.
+  double len = max-min;
+  double distperpt = len/size;
+  return (min+(pixel*distperpt));
+}
+
+Uint8 *k_set() {
+  SDL_PumpEvents();
+  return SDL_GetKeyState(NULL);
+}
+
+void k_quit(Uint8 *keys) {
+  if (keys[SDLK_ESCAPE]||keys[SDLK_q])
+    exit(0);
+}
+
+void set_generator(float xmin, float xmax, float ymin, float ymax, SDL_Surface *screen);
+
+int main (int argc, char **argv) {
+  // complex # stuff...
+  double xmin=-2;
+  double xmax=2;
+  double ymin=-1.5;
+  double ymax=1.5;
+  Uint8 *keys;
+  // Begin SDL Init codeblock. has to be here to preserve SDL_Surface pointer
+  if(SDL_Init(SDL_INIT_VIDEO)!=0){
+    printf("Error: %s\n",SDL_GetError());
+    return -1;
+  }
+  SDL_Surface *screen;
+  screen = SDL_SetVideoMode(640,480,8,SDL_RESIZABLE);
+  if (screen == NULL) {
+    printf("Error: %s\n",SDL_GetError());
+    return -1;
+  }
+  // End SDL Init block
+  set_generator(xmin, xmax, ymin, ymax, screen);
+  while(1) {
+    //SDL_Delay(3);
+    //keys = k_set();
+    SDL_WaitEvent(SDL_KEYPRESS);
+      keys = k_set();
+    k_quit(keys);
+  }
+  return 0;
+}
+
+
+void set_generator(float xmin, float xmax, float ymin, float ymax, SDL_Surface *screen) {
+  complex point, value;//better name than value, man...
+  int i;
+  //begin generator
+  int x,y;
+  SDL_LockSurface(screen);
+  for (x=0;x<(screen->w);x++) {
+    point.re = set_point(x, screen->w, xmin, xmax);
+    for (y=0;y<(screen->h);y++) {
+      point.im = set_point(y, screen->h, ymin, ymax);
+      Uint8 *p = (Uint8 *)screen->pixels +y *screen->pitch +x;
+      value = point;
+      for (i=0;i<100;i++) {//Mandelbrot ops here
+	value = add_complex(multiply_complex(value, value), point);
+	if (abs_complex(value) > 100)
+	  break;
+      }
+      if (abs_complex(value) > 100)
+	*p = SDL_MapRGB(screen->format, 0x00, 0x00, 0x00);//needs if statement for mandelbrot
+      else
+	*p = SDL_MapRGB(screen->format, 0xff, 0xff, 0xff);//needs if statement for mandelbrot
+    }
+  }
+  SDL_UnlockSurface(screen);
+  SDL_UpdateRect(screen, 0,0,0,0);
+  //end generator
+}

@@ -1,0 +1,20 @@
+//My implementation of a complex # library, easily portable(?) to opencl, for fractals et.al
+
+#include <math.h>
+#include "complex.h"
+
+complex set_complex(double re, double im) {
+  return {re,im};
+}
+
+complex add_complex(complex c1, complex c2) {
+  return {c1.re+c2.re, c1.im+c2.im};
+}
+
+complex multiply_complex(complex c1, complex c2) {
+  return { ((c1.re * c2.re) - (c1.im * c2.im)), ((c1.re * c2.im) + (c2.re * c1.im)) };
+}
+
+double abs_complex(complex c1) {
+
+}
